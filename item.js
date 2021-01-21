@@ -1,33 +1,13 @@
 import React from "react";
 import { View, StyleSheet, Text } from "react-native";
 
-class task {
-  constructor(title, body) {
-    this.title = title;
-    this.body = body;
-  }
-
-  get content() {
-    return (
-      <View class="container">
-        <View>
-          <Text class="titleText">{props.item.title}</Text>
-        </View>
-        <View>
-          <Text class="bodyText">{props.item.body}</Text>
-        </View>
-      </View>
-    );
-  }
-}
-
 export const Todo = (props) => {
   return (
     <View class="container">
-      <View>
+      <View style={styles.title}>
         <Text style={styles.titleText}>{props.item.title}</Text>
       </View>
-      <View>
+      <View style={styles.body}>
         <Text class={styles.bodyText}>{props.item.body}</Text>
       </View>
     </View>
@@ -44,7 +24,13 @@ const styles = StyleSheet.create({
   titleText: {
     fontSize: 20,
   },
+  title: {
+    backgroundColor: "purple",
+  },
   bodyText: {
-    fontSize: 10,
+    fontSize: 20,
+  },
+  body: {
+    backgroundColor: "blue",
   },
 });
