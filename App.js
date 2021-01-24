@@ -1,23 +1,36 @@
-import { StatusBar } from "expo-status-bar";
-import React from "react";
-import { StyleSheet, Text, View } from "react-native";
-import { Cryptex } from "./cryptex";
+import React, { useState } from "react";
+import { View } from "react-native";
 import { todo } from "./todo";
 
+import { CurrentTodoView } from "./current-todo-view";
+
 export default function App() {
-  let items = [todo("Head1", "body1"), todo("head2", "body2")];
+  let root = todo({ text: "This is a task" });
+  let childIndex = root.createChild({ text: "To do that, do this." });
 
-  return (
-    <View style={{ flex: 1 }}>
-      <Cryptex items={items} />
-      <View style={{ flex: 2, backgroundColor: "skyblue" }} />
-      <View style={{ flex: 3, backgroundColor: "steelblue" }} />
-    </View>
-  );
+  root.createChild({
+    text: "And then I was thinking, why are birds sometimes blue?",
+    type: "note",
+  });
+
+  root.createChild({
+    text: "See a bird",
+    type: "checkbox",
+  });
+
+  const [screen, setScreen] = useState(0);
+  const [rootTodo, setRootTodo] = useState(root);
+  const [taskIndex, setTaskIndex] = useState(childIndex);
+
+  switch (screen) {
+    default:
+      return (
+        <View style={{ flex: 1 }}>
+          <CurrentTodoView
+            root={rootTodo}
+            taskIndex={taskIndex}
+          ></CurrentTodoView>
+        </View>
+      );
+  }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "#fff000",
-  },
-});
