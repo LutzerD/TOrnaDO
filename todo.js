@@ -24,6 +24,7 @@ export const todo = (config) => {
     ...config,
     id: getNextTodoId(),
     children: [],
+    type: config.type || "checkbox",
     completed: false,
   };
 
@@ -35,8 +36,8 @@ export const todo = (config) => {
 
   item.createChild = function (config) {
     console.log("Fathering:", config);
-    this.children.push(todo({ ...config }));
-    return this.children.length - 1;
+    let nextIndex = this.children.push(todo({ ...config })) - 1;
+    return [nextIndex, this.children[nextIndex]];
   };
 
   return item;
