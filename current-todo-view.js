@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text } from "react-native";
-import { TodoListView } from "./list-items.js";
+import { ListItem } from "./list-items.js";
+import { Stopwatch } from "./stopwatch.js";
 
 const SummaryHeaderView = (props) => {
   return (
@@ -9,7 +10,8 @@ const SummaryHeaderView = (props) => {
         {props.todo.text}
       </Text>
       <Text style={{ flex: 2 }} adjustsFontSizeToFit={true}>
-        🕒 1:7:00
+        🕒
+        <Stopwatch />
       </Text>
     </View>
   );
@@ -23,13 +25,110 @@ const SummaryView = (props) => {
         <SummaryHeaderView todo={props.root} />
       </View>
       <View style={{ flex: 3, flexDirection: "column" }}>
-        <TodoListView
-          root={props.root}
-          filter={{ type: "checkbox" }}
-          maxDepth={2}
-        />
+        <ExpandedTodoView root={props.root} />
       </View>
     </View>
+  );
+};
+
+const ExpandedTodoView = (props) => {
+  let root = props.root;
+
+  let content = root.children.map((todo) => {
+    let isCheckbox = todo.type == "checkbox";
+    let containsCheckboxes = todo.containsCheckboxes(true);
+    console.log("mapping: ", todo.text);
+
+    if (isCheckbox && !containsCheckboxes) {
+      return (
+        <ListItem key={todo.id} truncate={props.truncate || true} item={todo} />
+      );
+    } else if (containsCheckboxes) {
+      return (
+        <View
+          style={{
+            flex: 1,
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+          key={todo.id}
+        >
+          <ListItem
+            truncate={props.truncate || true}
+            item={todo}
+            style={{ borderWidth: 5 }}
+          />
+          <Text>...CB eventually</Text>
+        </View>
+      );
+    } else {
+      console.log("not including: ", todo.text);
+
+      return null;
+    }
+  });
+
+  return <View style={{ flex: 1, flexDirection: "column" }}>{content}</View>;
+};
+
+/*
+Params
+  root={root}
+  checkboxesOnly={true}
+  maxDepth={2}
+  truncate={}
+  skipRoot={true}
+  depth={1}
+*/
+const eeeeeTodoView = (props) => {
+  let root = props.root;
+
+  let currentDepth = props.depth || 1;
+  let lastTreeNode = props.maxDepth && currentDepth >= props.maxDepth;
+
+  let content = root.children.map((todo) => {
+    if (lastTreeNode) {
+      return (
+        <ListItem
+          key={todo.id}
+          truncate={props.truncate || true}
+          item={todo}
+          filter={props.filter}
+        />
+      );
+    } else {
+      console.log("Sending root? ", todo.text);
+      return (
+        <View style={{ flex: 1, flexDirection: "column" }} key={todo.id}>
+          <View style={{ flex: 1 }}>
+            <ListItem
+              truncate={props.truncate || true}
+              item={todo}
+              filter={props.filter}
+            />
+          </View>
+          <View style={{ flex: 1, flexDirection: "row" }}>
+            <View style={{ flex: 1 }} />
+            <View style={{ flex: 9 }}>
+              <TodoListView
+                adjustParent={(childId, value) =>
+                  adjustFamilySize(childId, value)
+                }
+                root={todo}
+                maxDepth={props.maxDepth}
+                depth={currentDepth + 1}
+                filter={props.filter}
+              />
+            </View>
+          </View>
+        </View>
+      );
+    }
+  });
+
+  return (
+    <View style={{ flex: familySize, flexDirection: "column" }}>{content}</View>
   );
 };
 

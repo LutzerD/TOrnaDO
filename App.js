@@ -8,7 +8,7 @@ const loadTestData = (root) => {
     text: "To do that, do this.",
   });
 
-  root.createChild({
+  const [blue, blueTodo] = root.createChild({
     text: "And then I was thinking, why are birds sometimes blue?",
     type: "note",
   });
@@ -16,6 +16,10 @@ const loadTestData = (root) => {
   const [seeIndex, seeTodo] = root.createChild({
     text: "See a bird",
     // type:"checkbox",//default
+  });
+
+  blueTodo.createChild({
+    text: "Google why birds are blue?",
   });
 
   seeTodo.createChild({

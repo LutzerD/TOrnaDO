@@ -34,6 +34,21 @@ export const todo = (config) => {
     this.completed = completed;
   };
 
+  //returns false if parent is cb and no children cbs
+  item.containsCheckboxes = function (root) {
+    console.log("Checking cbs");
+    if (!root && this.type == "checkbox") {
+      console.log("Has cbs", this.text);
+      return true;
+    } else {
+      for (const childIndex in this.children) {
+        if (this.children[childIndex].containsCheckboxes()) return true;
+      }
+    }
+    console.log("Doesn't have cbs", this.text);
+    return false;
+  };
+
   item.createChild = function (config) {
     console.log("Fathering:", config);
     let nextIndex = this.children.push(todo({ ...config })) - 1;
