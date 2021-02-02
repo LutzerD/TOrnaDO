@@ -111,6 +111,7 @@ const eeeeeTodoView = (props) => {
           <View style={{ flex: 1, flexDirection: "row" }}>
             <View style={{ flex: 1 }} />
             <View style={{ flex: 9 }}>
+              <Text>Child:</Text>
               <TodoListView
                 adjustParent={(childId, value) =>
                   adjustFamilySize(childId, value)

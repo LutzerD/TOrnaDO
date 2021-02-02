@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Text, View, CheckBox } from "react-native";
+import { Text, View, CheckBox, TextInput } from "react-native";
 
 /*
 Handles:
@@ -11,15 +11,6 @@ export const ListItem = (props) => {
   if (!props.item) {
     return null;
   }
-  // else if (props.filter) {
-  //   let item = props.item;
-  //   for (const [key, value] of Object.entries(props.filter)) {
-  //     if (item[key] != value) {
-  //       console.log("filtering ", item.text);
-  //       return null;
-  //     }
-  //   }
-  // }
 
   let text = "";
   if (props.truncate) {
@@ -33,33 +24,73 @@ export const ListItem = (props) => {
 
   switch (props.item.type) {
     case "note":
-      return <Note text={text}></Note>;
+      return (
+        <Note
+          edit={props.edit}
+          callback={props.callback}
+          item={props.item}
+          text={text}
+        ></Note>
+      );
     case "checkbox":
     default:
-      return <Checkbox item={props.item} text={text}></Checkbox>;
+      return (
+        <Checkbox
+          edit={props.edit}
+          callback={props.callback}
+          item={props.item}
+          text={text}
+        ></Checkbox>
+      );
       break;
   }
 };
 
 export const Checkbox = (props) => {
   const [toggleCheckBox, setToggleCheckBox] = useState(false);
+  const [text, setText] = useState(
+    props.item ? props.item.text : props.text || ""
+  );
 
   return (
     <View style={{ flex: 1, flexDirection: "row", alignItems: "center" }}>
       <CheckBox
         disabled={false}
         value={toggleCheckBox}
-        onValueChange={(newValue) => setToggleCheckBox(newValue)}
+        onValueChange={(newValue) => {
+          setToggleCheckBox(newValue);
+          if (props.callback) props.callback();
+        }}
       />
-      <Text> {props.text}</Text>
+      {props.edit ? (
+        <TextInput value={text} onChangeText={(text) => setText(text)} />
+      ) : (
+        <Text> {props.item ? props.item.text : props.text}</Text>
+      )}
     </View>
   );
 };
 
 export const Note = (props) => {
+  const [text, setText] = useState(
+    props.item ? props.item.text : props.text || ""
+  );
+
   return (
     <View style={{ flex: 1 }}>
-      <Text>- {props.text}</Text>
+      <Text>Text: {props.item.text}</Text>
+      {props.edit ? (
+        <TextInput
+          defaultValue={props.item.text}
+          onChangeText={(text) => {
+            props.item.text = text;
+            props.item.createChild({ text: text });
+            if (props.callback) props.callback();
+          }}
+        />
+      ) : (
+        <Text> {props.item ? props.item.text : props.text}</Text>
+      )}
     </View>
   );
 };

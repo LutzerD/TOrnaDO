@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View } from "react-native";
-import { todo } from "./todo";
+import { makeTodo } from "./todo";
 import { CurrentTodoView } from "./current-todo-view";
+import { NoteView } from "./noteView";
 
 const loadTestData = (root) => {
   const [childIndex] = root.createChild({
@@ -39,15 +40,19 @@ const loadTestData = (root) => {
 };
 
 export default function App() {
-  let root = todo({ text: "This is a task" });
-
+  let root = makeTodo({ text: "This is a task" });
   let childIndex = loadTestData(root);
 
-  const [screen, setScreen] = useState(0);
-  const [rootTodo, setRootTodo] = useState(root);
+  const [screen, setScreen] = useState("notes");
   const [taskIndex, setTaskIndex] = useState(childIndex);
 
   switch (screen) {
+    case "notes":
+      return (
+        <View style={{ flex: 1 }}>
+          <NoteView root={root} />
+        </View>
+      );
     default:
       return (
         <View style={{ flex: 1 }}>
