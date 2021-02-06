@@ -17,6 +17,7 @@ so in document view, hitting enter == creating a new todo.
 */
 
 export const makeTodo = (config) => {
+  console.log("Config:", config);
   let item = {
     ...config,
     id: getNextTodoId(),
@@ -45,6 +46,8 @@ export const makeTodo = (config) => {
     if (callback) callback();
     return [nextIndex, this.children[nextIndex]];
   };
+
+  console.log("new text", item.text);
 
   return item;
 };

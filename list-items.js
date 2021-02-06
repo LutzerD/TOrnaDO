@@ -46,6 +46,16 @@ export const ListItem = (props) => {
   }
 };
 
+var autoFocus;
+var autoFocusNext = (id) => {
+  if (autoFocus == id) {
+    autoFocus = undefined;
+    return true;
+  } else {
+    return false;
+  }
+};
+
 export const Checkbox = (props) => {
   const [toggleCheckBox, setToggleCheckBox] = useState(false);
   const [text, setText] = useState(
@@ -63,14 +73,36 @@ export const Checkbox = (props) => {
         }}
       />
       {props.edit ? (
-        <TextInput value={text} onChangeText={(text) => setText(text)} />
+        <TodoText item={props.item} callback={props.callback} />
       ) : (
         <Text> {props.item ? props.item.text : props.text}</Text>
       )}
     </View>
   );
 };
+const TodoText = (props) => {
+  console.log(props.item);
+  return (
+    <TextInput
+      autoFocus={autoFocusNext(props.item.id)}
+      defaultValue={props.item.text}
+      onChange={(text) => {
+        props.item.text = text;
+      }}
+      onSubmitEditing={(text) => {
+        props.item.text = text;
+        autoFocus = true;
+        console.log("item.type:", props.item);
+        const [newTodoIndex, newTodo] = props.item.createChild({
+          type: props.item.type,
+        });
 
+        autoFocus = newTodo.id;
+        if (props.callback) props.callback();
+      }}
+    />
+  );
+};
 export const Note = (props) => {
   const [text, setText] = useState(
     props.item ? props.item.text : props.text || ""
@@ -80,14 +112,7 @@ export const Note = (props) => {
     <View style={{ flex: 1 }}>
       <Text>Text: {props.item.text}</Text>
       {props.edit ? (
-        <TextInput
-          defaultValue={props.item.text}
-          onChangeText={(text) => {
-            props.item.text = text;
-            props.item.createChild({ text: text });
-            if (props.callback) props.callback();
-          }}
-        />
+        <TodoText item={props.item} callback={props.callback} />
       ) : (
         <Text> {props.item ? props.item.text : props.text}</Text>
       )}
