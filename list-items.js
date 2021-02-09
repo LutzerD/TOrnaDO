@@ -5,6 +5,7 @@ import { Text, View, CheckBox, TextInput } from "react-native";
 Handles:
   props.item.type = "list" || "note"
 */
+const tabSize = 15;
 
 let maxNoteLength = 20;
 export const ListItem = (props) => {
@@ -63,15 +64,17 @@ export const Checkbox = (props) => {
   );
 
   return (
-    <View style={{ flex: 1, flexDirection: "row", alignItems: "center" }}>
+    <View style={{ flexDirection: "row", alignItems: "center" }}>
       <CheckBox
         disabled={false}
+        style={{ width: tabSize }}
         value={toggleCheckBox}
         onValueChange={(newValue) => {
           setToggleCheckBox(newValue);
           if (props.callback) props.callback();
         }}
       />
+      <Text>&nbsp;</Text>
       {props.edit ? (
         <TodoText item={props.item} callback={props.callback} />
       ) : (
@@ -80,22 +83,46 @@ export const Checkbox = (props) => {
     </View>
   );
 };
+
 const TodoText = (props) => {
   console.log(props.item);
+  // return (
+  //   <View style={{ flexDirection: "column" }}>
+  //     <TextInput
+  //       onSelectionChange={(selection) => {
+  //         selection.persist();
+  //         console.log("selection");
+  //       }}
+  //       style={{ maxHeight: 40 }}
+  //       multiline={true}
+  //       numberOfLines={30}
+  //       onChange={(event) => {
+  //         event.persist();
+  //         console.log(event.nativeEvent);
+  //       }}
+  //     />
+  //   </View>
+  // );
   return (
     <TextInput
       autoFocus={autoFocusNext(props.item.id)}
       defaultValue={props.item.text}
+      multiline={true}
+      editable
       onChange={(text) => {
         props.item.text = text;
       }}
+      style={{ outline: "none" }}
       onSubmitEditing={(text) => {
         props.item.text = text;
         autoFocus = true;
-        console.log("item.type:", props.item);
-        const [newTodoIndex, newTodo] = props.item.createChild({
-          type: props.item.type,
-        });
+        const [newTodoIndex, newTodo] = props.item.parent.createChild(
+          {
+            type: props.item.type,
+          },
+          false,
+          { after: props.item.id }
+        );
 
         autoFocus = newTodo.id;
         if (props.callback) props.callback();
@@ -103,14 +130,16 @@ const TodoText = (props) => {
     />
   );
 };
+
 export const Note = (props) => {
   const [text, setText] = useState(
     props.item ? props.item.text : props.text || ""
   );
 
   return (
-    <View style={{ flex: 1 }}>
-      <Text>Text: {props.item.text}</Text>
+    <View style={{ flexDirection: "row", alignItems: "center" }}>
+      <Text style={{ width: tabSize }}>-</Text>
+      <Text>&nbsp;</Text>
       {props.edit ? (
         <TodoText item={props.item} callback={props.callback} />
       ) : (
