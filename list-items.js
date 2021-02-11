@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Text, View, CheckBox, TextInput } from "react-native";
 
 /*
@@ -31,7 +31,7 @@ export const ListItem = (props) => {
           callback={props.callback}
           item={props.item}
           text={text}
-        ></Note>
+        />
       );
     case "checkbox":
     default:
@@ -41,7 +41,7 @@ export const ListItem = (props) => {
           callback={props.callback}
           item={props.item}
           text={text}
-        ></Checkbox>
+        />
       );
       break;
   }
@@ -64,7 +64,7 @@ export const Checkbox = (props) => {
   );
 
   return (
-    <View style={{ flexDirection: "row", alignItems: "center" }}>
+    <View style={{ flexDirection: "row", alignItems: "flex-start" }}>
       <CheckBox
         disabled={false}
         style={{ width: tabSize }}
@@ -85,26 +85,8 @@ export const Checkbox = (props) => {
 };
 
 const TodoText = (props) => {
-  console.log(props.item);
-  // return (
-  //   <View style={{ flexDirection: "column" }}>
-  //     <TextInput
-  //       onSelectionChange={(selection) => {
-  //         selection.persist();
-  //         console.log("selection");
-  //       }}
-  //       style={{ maxHeight: 40 }}
-  //       multiline={true}
-  //       numberOfLines={30}
-  //       onChange={(event) => {
-  //         event.persist();
-  //         console.log(event.nativeEvent);
-  //       }}
-  //     />
-  //   </View>
-  // );
   return (
-    <TextInput
+    <ExpandingTextInput
       autoFocus={autoFocusNext(props.item.id)}
       defaultValue={props.item.text}
       multiline={true}
@@ -137,7 +119,7 @@ export const Note = (props) => {
   );
 
   return (
-    <View style={{ flexDirection: "row", alignItems: "center" }}>
+    <View style={{ flexDirection: "row", alignItems: "flex-start" }}>
       <Text style={{ width: tabSize }}>-</Text>
       <Text>&nbsp;</Text>
       {props.edit ? (
@@ -146,5 +128,27 @@ export const Note = (props) => {
         <Text> {props.item ? props.item.text : props.text}</Text>
       )}
     </View>
+  );
+};
+
+const ExpandingTextInput = (props) => {
+  const [numLines, setNumLines] = useState(1);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  });
+
+  return (
+    <TextInput
+      {...props}
+      multiline={true}
+      numberOfLines={numLines}
+      onContentSizeChange={(event) => {
+        if (mounted) {
+          setNumLines(numLines + 1);
+        }
+      }}
+    />
   );
 };
