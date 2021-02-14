@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Text, View, CheckBox, TextInput } from "react-native";
+import { ExpandingTextInput } from "./lib/TextComponents.js";
 
 /*
 Handles:
@@ -78,7 +79,7 @@ export const Checkbox = (props) => {
       {props.edit ? (
         <TodoText item={props.item} callback={props.callback} />
       ) : (
-        <Text> {props.item ? props.item.text : props.text}</Text>
+        <Text>{props.item ? props.item.text : props.text}</Text>
       )}
     </View>
   );
@@ -88,24 +89,24 @@ const TodoText = (props) => {
   return (
     <ExpandingTextInput
       autoFocus={autoFocusNext(props.item.id)}
-      defaultValue={props.item.text}
-      multiline={true}
-      editable
-      onChange={(text) => {
-        props.item.text = text;
+      text={props.item.text}
+      style={{
+        outline: "none",
+        borderTopColor: "black",
+        borderTopWidth: 1,
       }}
-      style={{ outline: "none" }}
       onSubmitEditing={(text) => {
+        console.log("submitted?");
         props.item.text = text;
         autoFocus = true;
         const [newTodoIndex, newTodo] = props.item.parent.createChild(
           {
+            text: "",
             type: props.item.type,
           },
           false,
           { after: props.item.id }
         );
-
         autoFocus = newTodo.id;
         if (props.callback) props.callback();
       }}
@@ -125,30 +126,8 @@ export const Note = (props) => {
       {props.edit ? (
         <TodoText item={props.item} callback={props.callback} />
       ) : (
-        <Text> {props.item ? props.item.text : props.text}</Text>
+        <Text>{props.item ? props.item.text : props.text}</Text>
       )}
     </View>
-  );
-};
-
-const ExpandingTextInput = (props) => {
-  const [numLines, setNumLines] = useState(1);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  });
-
-  return (
-    <TextInput
-      {...props}
-      multiline={true}
-      numberOfLines={numLines}
-      onContentSizeChange={(event) => {
-        if (mounted) {
-          setNumLines(numLines + 1);
-        }
-      }}
-    />
   );
 };
