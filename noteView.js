@@ -21,7 +21,6 @@ function collectKids(children) {
 
 export const NoteView = (props) => {
   let root = props.root;
-
   return (
     <View>
       <NoteTier root={root} />

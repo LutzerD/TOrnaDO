@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { View } from "react-native";
+import { View, Text } from "react-native";
 import { makeTodo } from "./todo";
 import { CurrentTodoView } from "./current-todo-view";
 import { NoteView } from "./noteView";
+// import { Load, Save } from "./todo-storage";
+import { Storage } from "./todo-storage";
 
 const loadTestData = (root) => {
   const [childIndex] = root.createChild({
@@ -39,12 +41,39 @@ const loadTestData = (root) => {
   return childIndex;
 };
 
-export default function App() {
-  let root = makeTodo({ text: "This is a task" });
-  let childIndex = loadTestData(root);
+const pageKeys = {
+  //  idk if this is a good idea / how things should be structured.
+  root: "root",
+};
 
-  const [screen, setScreen] = useState("notes");
-  const [taskIndex, setTaskIndex] = useState(childIndex);
+var root, childIndex;
+export default function App() {
+  const [screen, setScreen] = useState("loading");
+  const [taskIndex, setTaskIndex] = useState(0);
+  const [loaded, setLoaded] = useState(false);
+
+  // const [root, setRoot] = useState(null);
+  // const [childIndex, setChildIndex] = useState(null);
+
+  async function start() {
+    root = await Storage.load(pageKeys.root);
+    console.log("loaded:", root);
+
+    if (!root) {
+      root = makeTodo({ text: "This is a task" });
+      console.log("Got todo:", temp, "Root set to", root);
+      Storage.save(pageKeys.root, root);
+    }
+
+    childIndex = loadTestData(root);
+
+    setLoaded(true);
+    setScreen("notes");
+  }
+  // useEffect(() => {}, [root]);
+  if (!loaded) {
+    start();
+  }
 
   switch (screen) {
     case "notes":
@@ -53,13 +82,27 @@ export default function App() {
           <NoteView root={root} />
         </View>
       );
-    default:
+    case "current":
       return (
         <View style={{ flex: 1 }}>
           <CurrentTodoView
             root={rootTodo}
             taskIndex={taskIndex}
           ></CurrentTodoView>
+        </View>
+      );
+    case "loading":
+    default:
+      return (
+        <View
+          style={{
+            flex: 1,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Text>{screen == "Loading" ? "Loading" : "404?"}...</Text>
         </View>
       );
   }

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Storage } from "./lib/storage";
 
 let firstId = 0; //todo: Later this should be in a db / dynamically generated, when I store the todo's
 
@@ -17,7 +18,8 @@ so in document view, hitting enter == creating a new todo.
 */
 
 export const makeTodo = (config) => {
-  console.log("Config:", config);
+  console.log("Making todo with config:", config);
+
   let item = {
     ...config,
     id: getNextTodoId(),
@@ -25,6 +27,23 @@ export const makeTodo = (config) => {
     type: config.type || "checkbox",
     completed: false,
     text: config.text || "",
+  };
+
+  //Remove circular references so it may be stringified to save, for example
+  item.unlink = function () {
+    delete this.parent;
+    console.log(`Unlinked ${this.text}`);
+    console.log(this.children);
+    this.children.forEach((child) => child.unlink());
+  };
+
+  //Remove circular references so it may be stringified to save, for example
+  item.relink = function () {
+    console.log(`Relinked ${this.text}`);
+    this.children.forEach((child) => {
+      child.parent = this;
+      child.relink();
+    });
   };
 
   //returns false if parent is cb and no children cbs
@@ -62,7 +81,6 @@ export const makeTodo = (config) => {
     return [nextIndex, this.children[nextIndex]];
   };
 
-  console.log("new text", item.text);
-
+  console.log("Returning:", item);
   return item;
 };
