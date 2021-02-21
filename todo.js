@@ -1,53 +1,38 @@
 import React, { useState } from "react";
-import { Storage } from "./lib/storage";
+import { Storage } from "./todo-storage";
+import { idManager } from "./id-manager";
 
-let firstId = 0; //todo: Later this should be in a db / dynamically generated, when I store the todo's
-
-const getNextTodoId = () => {
-  return (firstId += 1);
+var id; //probably the screen...
+var lastScreen = "";
+export const onScreenChange = async function (screen) {
+  if (lastScreen != screen) {
+    id = await idManager(screen);
+  }
 };
 
-/*
-Config will be like - 
-{
-  text, //i.e. text 
-  content-type, //i.e. checkbox or notes, default checkbox - if over x letters, turn to note?
-}
-
-so in document view, hitting enter == creating a new todo.
-*/
-
-export const makeTodo = (config) => {
-  console.log("Making todo with config:", config);
-
-  let item = {
-    ...config,
-    id: getNextTodoId(),
-    children: [],
-    type: config.type || "checkbox",
-    completed: false,
-    text: config.text || "",
-  };
-
-  //Remove circular references so it may be stringified to save, for example
-  item.unlink = function () {
+export const decorateTodo = (todo) => {
+  todo.unlink = function () {
     delete this.parent;
     console.log(`Unlinked ${this.text}`);
     console.log(this.children);
     this.children.forEach((child) => child.unlink());
   };
 
-  //Remove circular references so it may be stringified to save, for example
-  item.relink = function () {
+  //Restore circular references so it may be stringified to save, for example
+  todo.relink = function () {
     console.log(`Relinked ${this.text}`);
     this.children.forEach((child) => {
       child.parent = this;
+      if (!child.relink) {
+        decorateTodo(child);
+        console.log("decorated child?", child.relink);
+      }
       child.relink();
     });
   };
 
   //returns false if parent is cb and no children cbs
-  item.containsCheckboxes = function (root) {
+  todo.containsCheckboxes = function (root) {
     if (!root && this.type == "checkbox") {
       return true;
     } else {
@@ -58,7 +43,21 @@ export const makeTodo = (config) => {
     return false;
   };
 
-  item.createChild = function (config, callback, placement) {
+  todo.save = async function (path) {
+    //TODO: On fail trigger reload? Or timeout and try again later? Otherwise it wont save on exit :C
+    let root = this;
+    for (var i = 0; i < 10; i++) {
+      if (!root.parent) {
+        break;
+      } else {
+        root = root.parent;
+        console.log(`got a parent at i=${i}!`);
+      }
+    }
+    Storage.saveTodo(path, root);
+  };
+
+  todo.createChild = function (config, callback, placement) {
     let nextChild = makeTodo({ ...config, parent: this });
     let nextIndex = 0;
 
@@ -80,6 +79,21 @@ export const makeTodo = (config) => {
     if (callback) callback();
     return [nextIndex, this.children[nextIndex]];
   };
+};
+
+export const makeTodo = (config) => {
+  console.log("Making todo with config:", config);
+
+  let item = {
+    text: "",
+    completed: false,
+    type: "checkbox",
+    children: [],
+    ...config,
+    id: config.id ? config.id : id.nextId(),
+  };
+
+  decorateTodo(item);
 
   console.log("Returning:", item);
   return item;

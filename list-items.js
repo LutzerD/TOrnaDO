@@ -86,31 +86,52 @@ export const Checkbox = (props) => {
 };
 
 const TodoText = (props) => {
+  const [changed, setChanged] = useState(false);
+  console.log(`Creating item ${props.item.id}`);
+
   return (
-    <ExpandingTextInput
-      autoFocus={autoFocusNext(props.item.id)}
-      text={props.item.text}
-      style={{
-        outline: "none",
-        borderTopColor: "black",
-        borderTopWidth: 1,
-      }}
-      onSubmitEditing={(text) => {
-        console.log("submitted?");
-        props.item.text = text;
-        autoFocus = true;
-        const [newTodoIndex, newTodo] = props.item.parent.createChild(
-          {
-            text: "",
-            type: props.item.type,
-          },
-          false,
-          { after: props.item.id }
-        );
-        autoFocus = newTodo.id;
-        if (props.callback) props.callback();
-      }}
-    />
+    <>
+      <Text>Parent {JSON.stringify(props.item.id)} done</Text>
+      <ExpandingTextInput
+        autoFocus={autoFocusNext(props.item.id)}
+        text={props.item.text}
+        style={{
+          outline: "none",
+          borderTopColor: "black",
+          borderTopWidth: 1,
+        }}
+        onChangeText={() => {
+          console.log("changed!");
+          setChanged(true);
+        }}
+        onBlur={() => {
+          console.log("blurred!");
+          if (changed) {
+            console.log("saving!", props.item.parent.id);
+            props.item.save("root");
+          }
+        }}
+        onFocus={() => {
+          console.log("focused!");
+          setChanged(false);
+        }}
+        onSubmitEditing={(text) => {
+          console.log("submitted?");
+          props.item.text = text;
+          autoFocus = true;
+          const [newTodoIndex, newTodo] = props.item.parent.createChild(
+            {
+              text: "",
+              type: props.item.type,
+            },
+            false,
+            { after: props.item.id }
+          );
+          autoFocus = newTodo.id;
+          if (props.callback) props.callback();
+        }}
+      />
+    </>
   );
 };
 
